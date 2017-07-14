@@ -1,37 +1,40 @@
 import java.util.LinkedList;
 import java.util.Queue;
 
+
 public class Servidor {
 
     private Queue<Fregues> fila1;
     private Queue<Fregues> fila2;
+    private Fregues freguesTratado;
     private int nextInFila1;
     private int nextInFila2;
     private int nextOut;
     private boolean isOcupado;
+    private final boolean LIVRE = false;
 
-    public Servidor(){ // inicia servidor com estado livre, 1 fregues em cada fila
+    public Servidor() { // inicia servidor com estado livre, 1 fregues em cada fila
 
-        System.out.println("Iniciando servidor...");
+    	Util.printaMensagem("Iniciando servidor...");
+                
         fila1 = new LinkedList<>();
         fila2 = new LinkedList<>();
         nextInFila1 = 0;
         nextInFila2 = 0;
         nextOut = 0;
-        isOcupado = false;
+        isOcupado = LIVRE;
 
         Fregues freguesFila1 = new Fregues(0);
         Fregues freguesFila2 = new Fregues(1);
         addFreguesFila1(freguesFila1);
         addFreguesFila2(freguesFila2);
 
-        System.out.println("Escalonando proxima chegada classe 1...");
+    	Util.printaMensagem("Escalonando proxima chegada classe 1...");
         escalonaProximaChegadaFila1();
-        System.out.println("Chegada classe 1 em " + getNextInFila1() + " unidades de tempo");
-        System.out.println("Escalonando proxima chegada classe 2...");
+    	Util.printaMensagem("Chegada classe 1 em " + getNextInFila1() + " unidades de tempo");
+    	Util.printaMensagem("Escalonando proxima chegada classe 2...");
         escalonaProximaChegadaFila2();
-        System.out.println("Chegada classe 2 em " + getNextInFila2() + " unidades de tempo");
-
+    	Util.printaMensagem("Chegada classe 2 em " + getNextInFila2() + " unidades de tempo");
     }
 
 
@@ -39,16 +42,28 @@ public class Servidor {
         fila1.add(fregues);
     }
 
-    public Fregues trataFreguesFila1(){
-        return fila1.poll();
+    public Fregues trataFreguesFila1() {
+    	Util.printaMensagem("Tratando fregues da fila 1...");
+    	Fregues f = fila1.poll();
+    	Util.printaMensagem("Fregues id = " + f.getId());
+
+        this.freguesTratado = f;
+
+        return f;
     }
 
     public void addFreguesFila2(Fregues fregues){
         fila2.add(fregues);
     }
 
-    public Fregues trataFreguesFila2(){
-        return fila2.poll();
+    public Fregues trataFreguesFila2() {
+    	Util.printaMensagem("Tratando fregues da fila 2...");
+    	Fregues f = fila2.poll();
+    	Util.printaMensagem("Fregues id = " + f.getId());
+        
+        this.freguesTratado = f;
+    	
+        return f;
     }
 
     public Queue<Fregues> getFila1() {
@@ -83,8 +98,9 @@ public class Servidor {
         this.nextOut = nextOut;
     }
 
-    public void escalonaProximaChegadaFila1(){
+    public void escalonaProximaChegadaFila1() {
         setNextInFila1(nextInFila1 + Util.geraChegadaClasse1());
+    	Util.printaMensagem("Proxima chegada no tempo " + this.getNextInFila1());
     }
 
     public void setEstado(boolean isOcupado){
@@ -95,17 +111,25 @@ public class Servidor {
         return isOcupado;
     }
 
-    public void escalonaProximaChegadaFila2(){
+    public void escalonaProximaChegadaFila2() {
         setNextInFila2(nextInFila2 + Util.geraChegadaClasse2());
+        
+    	Util.printaMensagem("Proxima chegada no tempo " + this.getNextInFila2());
     }
 
-    public void escalonaFimDoServico(int tempoAtual){
+    public void escalonaFimDoServico(int tempoAtual) {
         setNextOut(tempoAtual + Util.geraSaida());
+    	Util.printaMensagem("O servico terminara no tempo " + this.getNextOut());
     }
 
     @Override
     public String toString(){
-        String retorno = "";
+    	String status = "LIVRE";
+    	if (isOcupado) { 
+    		status = "OCUPADO";
+    	}
+    	
+        String retorno = "Estado do servidor: " + status + "\n"; 
         retorno += "FILA 1:" + "\n";
         retorno += "[";
         for (Fregues f: fila1){
@@ -120,6 +144,8 @@ public class Servidor {
             retorno += f.toString() + ",";
         }
         retorno += "]";
+        
+        retorno += "\nFreguês que está sendo tratado: " + this.freguesTratado.toString();
 
         return retorno;
     }
